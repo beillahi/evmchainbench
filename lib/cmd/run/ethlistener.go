@@ -121,6 +121,7 @@ func (el *EthereumListener) handleBlockResponse(response map[string]interface{})
 	if result, ok := response["result"].(map[string]interface{}); ok {
 		if txns, ok := result["transactions"].([]interface{}); ok {
 			el.limiter.IncreaseLimit(len(txns))
+			//fmt.Printf("Block time: ", result["timestamp"].(string))
 			ts, _ := strconv.ParseInt(result["timestamp"].(string)[2:], 16, 64)
 			gasUsed, _ := strconv.ParseInt(result["gasUsed"].(string)[2:], 16, 64)
 			gasLimit, _ := strconv.ParseInt(result["gasLimit"].(string)[2:], 16, 64)
@@ -147,12 +148,21 @@ func (el *EthereumListener) handleBlockResponse(response map[string]interface{})
 				totalTxCount := int64(0)
 				totalGasLimit := int64(0)
 				totalGasUsed := int64(0)
-				for _, block := range el.blockStat {
+				// calculate TPS for timeSpan - 1 to ensure accuracy
+				newLen := len(el.blockStat)
+				for i := len(el.blockStat) - 1; i >= 0; i-- {
+					if el.blockStat[i].Time < el.blockStat[len(el.blockStat)-1].Time {
+						break
+					}
+					newLen--
+				}
+
+				for _, block := range el.blockStat[:newLen] {
 					totalTxCount += block.TxCount
 					totalGasLimit += block.GasLimit
 					totalGasUsed += block.GasUsed
 				}
-				tps := totalTxCount / timeSpan
+				tps := totalTxCount / (timeSpan - 1)
 				gasUsedPercent := float64(totalGasUsed) / float64(totalGasLimit)
 				if tps > el.bestTPS {
 					el.bestTPS = tps
