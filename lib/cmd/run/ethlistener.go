@@ -122,6 +122,8 @@ func (el *EthereumListener) handleBlockResponse(response map[string]interface{})
 		if txns, ok := result["transactions"].([]interface{}); ok {
 			el.limiter.IncreaseLimit(len(txns))
 			ts, _ := strconv.ParseInt(result["timestamp"].(string)[2:], 16, 64)
+			height, _ := strconv.ParseInt(result["number"].(string)[2:], 16, 64)
+			fmt.Printf("handled block height: %d hash: %+v txns: %d\n", height, result["hash"].(string)[2:], int64(len(txns)))
 			gasUsed, _ := strconv.ParseInt(result["gasUsed"].(string)[2:], 16, 64)
 			gasLimit, _ := strconv.ParseInt(result["gasLimit"].(string)[2:], 16, 64)
 			el.blockStat = append(el.blockStat, BlockInfo{
