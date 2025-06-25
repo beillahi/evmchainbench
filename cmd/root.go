@@ -33,5 +33,5 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringP("http-rpc", "", "http://127.0.0.1:8545", "RPC HTTP Endpoint")
 	rootCmd.PersistentFlags().StringP("ws-rpc", "", "ws://127.0.0.1:8546", "RPC WS Endpoint")
-	rootCmd.PersistentFlags().IntP("mempool", "", 5000, "Mempool size")
+	rootCmd.PersistentFlags().IntP("mempool", "", 20000, "Mempool size")
 }
